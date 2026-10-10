@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Event Hub</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6ff;
+            color: #202840;
+        }
+
+        header {
+            background: linear-gradient(135deg, #123c91, #4776e6, #00bcd4);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        nav {
+            background: #102b61;
+            padding: 16px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            background: white;
+            margin-bottom: 25px;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px #ccd5e5;
+        }
+
+        h2 {
+            color: #1749a5;
+        }
+
+        .events {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            padding: 20px;
+            border: 1px solid #dce5f5;
+            border-radius: 12px;
+            background: #f9fbff;
+        }
+
+        input, select, textarea, button {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 12px 0;
+            padding: 13px;
+            border: 1px solid #ccd5e5;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #1757c2;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        footer {
+            background: #102b61;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🎓 Campus Event Hub</h1>
+        <p>Discover. Register. Participate.</p>
+    </header>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#events">Events</a>
+        <a href="#register">Register</a>
+        <a href="#admin">Admin</a>
+    </nav>
+
+    <main>
+        <section id="home">
+            <h2>Welcome to Your Campus!</h2>
+            <p>Discover exciting events, workshops and activities at your college.</p>
+        </section>
+
+    <section id="admin">
+        <h2>Admin Panel</h2>
+        <p>Add a new campus event below.</p>
+
+        <form id="admin-form">
+            <input type="text" id="admin-event-name"
+               placeholder="Event name" required>
+
+            <input type="date" id="admin-event-date" required>
+
+            <input type="text" id="admin-event-location"
+               placeholder="Event location" required>
+
+            <textarea id="admin-event-description"
+                  placeholder="Event description" required></textarea>
+
+            <button type="submit">Add Event</button>
+        </form>
+    </section>
+
+        <section id="events">
+            <h2>Upcoming Events</h2>
+            <div class="events">
+                <article class="card">
+                    <h3>Tech Fest 2026</h3>
+                    <p>📅 November 15, 2026</p>
+                    <p>📍 College Auditorium</p>
+                    <p>Explore technology, innovation and exciting projects.</p>
+                </article>
+                <article class="card">
+                    <h3>Coding Competition</h3>
+                    <p>📅 November 20, 2026</p>
+                    <p>📍 Computer Lab</p>
+                    <p>Test your programming and problem-solving skills.</p>
+                </article>
+                <article class="card">
+                    <h3>Cultural Festival</h3>
+                    <p>📅 November 25, 2026</p>
+                    <p>📍 College Ground</p>
+                    <p>Celebrate music, dance, art and campus life.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="register">
+            <h2>Student Registration</h2>
+            <form>
+                <input type="text" placeholder="Your full name" required>
+                <input type="email" placeholder="Your email" required>
+                <select required>
+                    <option value="">Choose an event</option>
+                    <option>Tech Fest 2026</option>
+                    <option>Coding Competition</option>
+                    <option>Cultural Festival</option>
+                </select>
+                <button type="submit">Register Now</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        © 2026 Campus Event Hub | Agile Assignment
+    </footer>
+<script src="script.js"></script>
+</body>
+</html>
