@@ -6,6 +6,8 @@ const defaultEvents = [
         time: "10:00 AM",
         location: "College Auditorium",
         category: "Technology",
+        organizer: "Campus Events Committee",
+        capacity: 100,
         description: "Explore technology, innovation and exciting projects."
     },
     {
@@ -15,6 +17,8 @@ const defaultEvents = [
         time: "11:00 AM",
         location: "Computer Lab",
         category: "Academic",
+        organizer: "Computer Science Department",
+        capacity: 50,
         description: "Test your programming and problem-solving skills."
     },
     {
@@ -24,6 +28,8 @@ const defaultEvents = [
         time: "5:00 PM",
         location: "College Ground",
         category: "Cultural",
+        organizer: "Cultural Committee",
+        capacity: 200,
         description: "Celebrate music, dance, art and campus life."
     }
 ];
@@ -39,7 +45,22 @@ const eventCategories = [
 function loadSavedEvents() {
     try {
         const saved = localStorage.getItem("campusHubEvents");
-        return saved ? JSON.parse(saved) : defaultEvents;
+        const savedEvents = saved ? JSON.parse(saved) : defaultEvents;
+
+        if (!Array.isArray(savedEvents)) {
+            return defaultEvents;
+        }
+
+        // Add defaults for events saved before organizer and capacity were added.
+        return savedEvents.map(eventItem => ({
+            ...eventItem,
+            category: eventItem.category || "Other",
+            time: eventItem.time || "Time to be announced",
+            organizer: eventItem.organizer || "Campus Events Committee",
+            capacity: Number(eventItem.capacity) > 0
+                ? Number(eventItem.capacity)
+                : 100
+        }));
     } catch {
         return defaultEvents;
     }
@@ -53,6 +74,30 @@ function saveEvents() {
     } catch {
         alert("Unable to save events in this browser.");
     }
+}
+
+function loadRegistrations() {
+    try {
+        const savedRegistrations =
+            JSON.parse(localStorage.getItem("campusHubRegistrations") || "[]");
+
+        return Array.isArray(savedRegistrations) ? savedRegistrations : [];
+    } catch {
+        return [];
+    }
+}
+
+function getRegistrationCount(eventId) {
+    const registrations = loadRegistrations();
+
+    return registrations.filter(registration =>
+        String(registration.eventId) === String(eventId)
+    ).length;
+}
+
+function getAvailableSeats(eventItem) {
+    const capacity = Number(eventItem.capacity) || 0;
+    return Math.max(0, capacity - getRegistrationCount(eventItem.id));
 }
 
 function renderEvents() {
@@ -119,10 +164,10 @@ function renderEvents() {
         eventSelect.appendChild(option);
     });
 
-    const visibleEvents = events.filter(eventItem => {
-        return filter.value === "all" ||
-            (eventItem.category || "Other") === filter.value;
-    });
+    const visibleEvents = events.filter(eventItem =>
+        filter.value === "all" ||
+        (eventItem.category || "Other") === filter.value
+    );
 
     if (visibleEvents.length === 0) {
         const message = document.createElement("p");
@@ -183,7 +228,7 @@ const detailsContent = document.querySelector("#event-details-content");
 const detailsTitle = document.querySelector("#event-details-title");
 const closeDetailsButton = document.querySelector("#close-event-details");
 
-if (eventContainer && detailsDialog && detailsContent) {
+if (eventContainer && detailsDialog && detailsContent && detailsTitle) {
     eventContainer.addEventListener("click", function (clickEvent) {
         const button = clickEvent.target.closest(".event-details-button");
 
@@ -191,8 +236,8 @@ if (eventContainer && detailsDialog && detailsContent) {
             return;
         }
 
-        const selectedEvent = events.find(
-            eventItem => String(eventItem.id) === button.dataset.eventId
+        const selectedEvent = events.find(eventItem =>
+            String(eventItem.id) === button.dataset.eventId
         );
 
         if (!selectedEvent) {
@@ -213,12 +258,34 @@ if (eventContainer && detailsDialog && detailsContent) {
             `Time: ${selectedEvent.time || "Time to be announced"}`;
 
         const location = document.createElement("p");
-        location.textContent = `Location: ${selectedEvent.location}`;
+        location.textContent = `Venue: ${selectedEvent.location}`;
+
+        const organizer = document.createElement("p");
+        organizer.textContent =
+            `Organizer: ${selectedEvent.organizer || "Campus Events Committee"}`;
 
         const description = document.createElement("p");
         description.textContent = selectedEvent.description;
 
-        detailsContent.append(category, date, time, location, description);
+        const availableSeats = getAvailableSeats(selectedEvent);
+        const capacity = document.createElement("p");
+
+        if (availableSeats > 0) {
+            capacity.textContent = `Available seats: ${availableSeats}`;
+        } else {
+            capacity.textContent = "Registration status: Full";
+        }
+
+        detailsContent.append(
+            category,
+            date,
+            time,
+            location,
+            organizer,
+            description,
+            capacity
+        );
+
         detailsTitle.textContent = selectedEvent.name;
         detailsDialog.showModal();
     });
@@ -258,6 +325,8 @@ if (adminForm) {
             time: "Time to be announced",
             location,
             category: "Other",
+            organizer: "Campus Events Committee",
+            capacity: 100,
             description
         });
 
@@ -286,8 +355,8 @@ if (registrationForm) {
             return;
         }
 
-        const selectedEvent = events.find(
-            eventItem => String(eventItem.id) === eventId
+        const selectedEvent = events.find(eventItem =>
+            String(eventItem.id) === eventId
         );
 
         if (!selectedEvent) {
@@ -295,23 +364,20 @@ if (registrationForm) {
             return;
         }
 
-        let registrations = [];
-
-        try {
-            registrations = JSON.parse(
-                localStorage.getItem("campusHubRegistrations") || "[]"
-            );
-        } catch {
-            registrations = [];
-        }
+        const registrations = loadRegistrations();
 
         const alreadyRegistered = registrations.some(registration =>
             registration.email.toLowerCase() === email.toLowerCase() &&
-            registration.eventId === selectedEvent.id
+            String(registration.eventId) === String(selectedEvent.id)
         );
 
         if (alreadyRegistered) {
             alert("This email is already registered for this event.");
+            return;
+        }
+
+        if (getAvailableSeats(selectedEvent) <= 0) {
+            alert("Sorry, this event is full.");
             return;
         }
 
