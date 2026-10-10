@@ -3,6 +3,7 @@ const defaultEvents = [
         id: 1,
         name: "Tech Fest 2026",
         date: "2026-11-15",
+        time: "10:00 AM",
         location: "College Auditorium",
         category: "Technology",
         description: "Explore technology, innovation and exciting projects."
@@ -11,6 +12,7 @@ const defaultEvents = [
         id: 2,
         name: "Coding Competition",
         date: "2026-11-20",
+        time: "11:00 AM",
         location: "Computer Lab",
         category: "Academic",
         description: "Test your programming and problem-solving skills."
@@ -19,6 +21,7 @@ const defaultEvents = [
         id: 3,
         name: "Cultural Festival",
         date: "2026-11-25",
+        time: "5:00 PM",
         location: "College Ground",
         category: "Cultural",
         description: "Celebrate music, dance, art and campus life."
@@ -136,13 +139,16 @@ function renderEvents() {
         const date = document.createElement("p");
         date.textContent = `📅 ${event.date}`;
 
+        const time = document.createElement("p");
+        time.textContent = `🕒 ${event.time || "Time to be announced"}`;
+
         const location = document.createElement("p");
         location.textContent = `📍 ${event.location}`;
 
         const description = document.createElement("p");
         description.textContent = event.description;
 
-        card.append(title, category, date, location, description);
+        card.append(title, category, date, time, location, description);
         eventContainer.appendChild(card);
     });
 }
@@ -168,6 +174,7 @@ if (adminForm) {
             id: Date.now(),
             name,
             date,
+            time: "Time to be announced",
             location,
             category: "Other",
             description
