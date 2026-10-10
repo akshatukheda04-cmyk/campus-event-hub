@@ -1,10 +1,10 @@
-
 const defaultEvents = [
     {
         id: 1,
         name: "Tech Fest 2026",
         date: "2026-11-15",
         location: "College Auditorium",
+        category: "Technology",
         description: "Explore technology, innovation and exciting projects."
     },
     {
@@ -12,6 +12,7 @@ const defaultEvents = [
         name: "Coding Competition",
         date: "2026-11-20",
         location: "Computer Lab",
+        category: "Academic",
         description: "Test your programming and problem-solving skills."
     },
     {
@@ -19,9 +20,12 @@ const defaultEvents = [
         name: "Cultural Festival",
         date: "2026-11-25",
         location: "College Ground",
+        category: "Cultural",
         description: "Celebrate music, dance, art and campus life."
     }
 ];
+
+const eventCategories = ["Technology", "Academic", "Cultural", "Sports", "Other"];
 
 function loadSavedEvents() {
     try {
@@ -43,13 +47,53 @@ function saveEvents() {
 }
 
 function renderEvents() {
+    const eventSection = document.querySelector("#events");
     const eventContainer = document.querySelector(".events");
     const eventSelect = document.querySelector("#register select");
 
-    if (!eventContainer || !eventSelect) {
-        console.error("Events container or registration dropdown not found.");
+    if (!eventSection || !eventContainer || !eventSelect) {
+        console.error("Events section or registration dropdown not found.");
         return;
     }
+
+    let filter = document.querySelector("#category-filter");
+
+    if (!filter) {
+        const label = document.createElement("label");
+        label.htmlFor = "category-filter";
+        label.textContent = "Filter events by category";
+        label.style.display = "block";
+        label.style.margin = "16px 0 6px";
+
+        filter = document.createElement("select");
+        filter.id = "category-filter";
+        filter.setAttribute("aria-label", "Filter events by category");
+
+        eventSection.insertBefore(label, eventContainer);
+        eventSection.insertBefore(filter, eventContainer);
+    }
+
+    const previousCategory = filter.value || "all";
+
+    filter.replaceChildren();
+
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.textContent = "All categories";
+    filter.appendChild(allOption);
+
+    eventCategories.forEach(category => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        filter.appendChild(option);
+    });
+
+    filter.value = eventCategories.includes(previousCategory)
+        ? previousCategory
+        : "all";
+
+    filter.onchange = renderEvents;
 
     eventContainer.replaceChildren();
     eventSelect.replaceChildren();
@@ -60,11 +104,34 @@ function renderEvents() {
     eventSelect.appendChild(placeholder);
 
     events.forEach(event => {
+        const option = document.createElement("option");
+        option.value = event.id;
+        option.textContent = event.name;
+        eventSelect.appendChild(option);
+    });
+
+    const visibleEvents = events.filter(event => {
+        return filter.value === "all" ||
+            (event.category || "Other") === filter.value;
+    });
+
+    if (visibleEvents.length === 0) {
+        const message = document.createElement("p");
+        message.className = "empty-state";
+        message.textContent = "No events found in this category.";
+        eventContainer.appendChild(message);
+        return;
+    }
+
+    visibleEvents.forEach(event => {
         const card = document.createElement("div");
         card.className = "card";
 
         const title = document.createElement("h3");
         title.textContent = event.name;
+
+        const category = document.createElement("p");
+        category.textContent = `🏷️ Category: ${event.category || "Other"}`;
 
         const date = document.createElement("p");
         date.textContent = `📅 ${event.date}`;
@@ -75,13 +142,8 @@ function renderEvents() {
         const description = document.createElement("p");
         description.textContent = event.description;
 
-        card.append(title, date, location, description);
+        card.append(title, category, date, location, description);
         eventContainer.appendChild(card);
-
-        const option = document.createElement("option");
-        option.value = event.id;
-        option.textContent = event.name;
-        eventSelect.appendChild(option);
     });
 }
 
@@ -107,6 +169,7 @@ if (adminForm) {
             name,
             date,
             location,
+            category: "Other",
             description
         });
 
