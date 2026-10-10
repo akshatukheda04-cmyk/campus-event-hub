@@ -28,7 +28,13 @@ const defaultEvents = [
     }
 ];
 
-const eventCategories = ["Technology", "Academic", "Cultural", "Sports", "Other"];
+const eventCategories = [
+    "Technology",
+    "Academic",
+    "Cultural",
+    "Sports",
+    "Other"
+];
 
 function loadSavedEvents() {
     try {
@@ -85,10 +91,10 @@ function renderEvents() {
     allOption.textContent = "All categories";
     filter.appendChild(allOption);
 
-    eventCategories.forEach(category => {
+    eventCategories.forEach(categoryName => {
         const option = document.createElement("option");
-        option.value = category;
-        option.textContent = category;
+        option.value = categoryName;
+        option.textContent = categoryName;
         filter.appendChild(option);
     });
 
@@ -106,16 +112,16 @@ function renderEvents() {
     placeholder.textContent = "Choose an event";
     eventSelect.appendChild(placeholder);
 
-    events.forEach(event => {
+    events.forEach(eventItem => {
         const option = document.createElement("option");
-        option.value = event.id;
-        option.textContent = event.name;
+        option.value = eventItem.id;
+        option.textContent = eventItem.name;
         eventSelect.appendChild(option);
     });
 
-    const visibleEvents = events.filter(event => {
+    const visibleEvents = events.filter(eventItem => {
         return filter.value === "all" ||
-            (event.category || "Other") === filter.value;
+            (eventItem.category || "Other") === filter.value;
     });
 
     if (visibleEvents.length === 0) {
@@ -126,30 +132,101 @@ function renderEvents() {
         return;
     }
 
-    visibleEvents.forEach(event => {
-        const card = document.createElement("div");
+    visibleEvents.forEach(eventItem => {
+        const card = document.createElement("article");
         card.className = "card";
 
         const title = document.createElement("h3");
-        title.textContent = event.name;
+        title.textContent = eventItem.name;
 
         const category = document.createElement("p");
-        category.textContent = `🏷️ Category: ${event.category || "Other"}`;
+        category.textContent =
+            `🏷️ Category: ${eventItem.category || "Other"}`;
 
         const date = document.createElement("p");
-        date.textContent = `📅 ${event.date}`;
+        date.textContent = `📅 ${eventItem.date}`;
 
         const time = document.createElement("p");
-        time.textContent = `🕒 ${event.time || "Time to be announced"}`;
+        time.textContent =
+            `🕒 ${eventItem.time || "Time to be announced"}`;
 
         const location = document.createElement("p");
-        location.textContent = `📍 ${event.location}`;
+        location.textContent = `📍 ${eventItem.location}`;
 
         const description = document.createElement("p");
-        description.textContent = event.description;
+        description.textContent = eventItem.description;
 
-        card.append(title, category, date, time, location, description);
+        const detailsButton = document.createElement("button");
+        detailsButton.type = "button";
+        detailsButton.className = "event-details-button";
+        detailsButton.dataset.eventId = eventItem.id;
+        detailsButton.textContent = "View details";
+
+        card.append(
+            title,
+            category,
+            date,
+            time,
+            location,
+            description,
+            detailsButton
+        );
+
         eventContainer.appendChild(card);
+    });
+}
+
+// Open the selected event's details
+const eventContainer = document.querySelector(".events");
+const detailsDialog = document.querySelector("#event-details-dialog");
+const detailsContent = document.querySelector("#event-details-content");
+const detailsTitle = document.querySelector("#event-details-title");
+const closeDetailsButton = document.querySelector("#close-event-details");
+
+if (eventContainer && detailsDialog && detailsContent) {
+    eventContainer.addEventListener("click", function (clickEvent) {
+        const button = clickEvent.target.closest(".event-details-button");
+
+        if (!button) {
+            return;
+        }
+
+        const selectedEvent = events.find(
+            eventItem => String(eventItem.id) === button.dataset.eventId
+        );
+
+        if (!selectedEvent) {
+            return;
+        }
+
+        detailsContent.replaceChildren();
+
+        const category = document.createElement("p");
+        category.textContent =
+            `Category: ${selectedEvent.category || "Other"}`;
+
+        const date = document.createElement("p");
+        date.textContent = `Date: ${selectedEvent.date}`;
+
+        const time = document.createElement("p");
+        time.textContent =
+            `Time: ${selectedEvent.time || "Time to be announced"}`;
+
+        const location = document.createElement("p");
+        location.textContent = `Location: ${selectedEvent.location}`;
+
+        const description = document.createElement("p");
+        description.textContent = selectedEvent.description;
+
+        detailsContent.append(category, date, time, location, description);
+        detailsTitle.textContent = selectedEvent.name;
+        detailsDialog.showModal();
+    });
+}
+
+if (detailsDialog && closeDetailsButton) {
+    closeDetailsButton.addEventListener("click", function () {
+        detailsDialog.close();
     });
 }
 
@@ -157,13 +234,17 @@ function renderEvents() {
 const adminForm = document.querySelector("#admin-form");
 
 if (adminForm) {
-    adminForm.addEventListener("submit", function (event) {
-        event.preventDefault();
+    adminForm.addEventListener("submit", function (submitEvent) {
+        submitEvent.preventDefault();
 
-        const name = document.querySelector("#admin-event-name").value.trim();
-        const date = document.querySelector("#admin-event-date").value;
-        const location = document.querySelector("#admin-event-location").value.trim();
-        const description = document.querySelector("#admin-event-description").value.trim();
+        const name =
+            document.querySelector("#admin-event-name").value.trim();
+        const date =
+            document.querySelector("#admin-event-date").value;
+        const location =
+            document.querySelector("#admin-event-location").value.trim();
+        const description =
+            document.querySelector("#admin-event-description").value.trim();
 
         if (!name || !date || !location || !description) {
             alert("Please fill in all event details.");
@@ -192,8 +273,8 @@ if (adminForm) {
 const registrationForm = document.querySelector("#register form");
 
 if (registrationForm) {
-    registrationForm.addEventListener("submit", function (event) {
-        event.preventDefault();
+    registrationForm.addEventListener("submit", function (submitEvent) {
+        submitEvent.preventDefault();
 
         const fields = registrationForm.querySelectorAll("input");
         const name = fields[0]?.value.trim();
@@ -205,7 +286,9 @@ if (registrationForm) {
             return;
         }
 
-        const selectedEvent = events.find(item => String(item.id) === eventId);
+        const selectedEvent = events.find(
+            eventItem => String(eventItem.id) === eventId
+        );
 
         if (!selectedEvent) {
             alert("Please choose a valid event.");
@@ -222,10 +305,9 @@ if (registrationForm) {
             registrations = [];
         }
 
-        const alreadyRegistered = registrations.some(
-            registration =>
-                registration.email.toLowerCase() === email.toLowerCase() &&
-                registration.eventId === selectedEvent.id
+        const alreadyRegistered = registrations.some(registration =>
+            registration.email.toLowerCase() === email.toLowerCase() &&
+            registration.eventId === selectedEvent.id
         );
 
         if (alreadyRegistered) {
